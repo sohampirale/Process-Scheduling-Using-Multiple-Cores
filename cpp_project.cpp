@@ -6,6 +6,21 @@
 #include<unistd.h>
 using namespace std;
 
+#define space "\t\t\t\t\t"
+#define RESET       "\033[0m"  
+#define RED         "\033[31m"
+#define GREEN       "\033[32m"
+#define YELLOW      "\033[33m"
+#define BLUE        "\033[34m"
+#define MAGENTA     "\033[35m"
+#define CYAN        "\033[36m"
+#define WHITE       "\033[37m"
+
+#define BG_RED      "\033[41m"
+#define BG_GREEN    "\033[42m"
+#define BG_YELLOW   "\033[43m"
+#define BG_BLUE     "\033[44m"
+
 class process;
 class core;
 class resource;
@@ -45,7 +60,7 @@ class process{
             if(isImp)this->priority=priority;
         }    
         process(int bt,string pid){
-            cout<<"Demo process created by core"<<endl;
+            // cout<<"Demo process created by core"<<endl;
             this->bt=bt;
             this->pid=pid;
         } 
@@ -66,7 +81,7 @@ class resource{
 
             this->resource_name=resource_name;
             this->free_resources=free_resources;
-            cout<<free_resources<<" : "<<resource_name<<"'s created" <<endl;
+            cout<<MAGENTA<<free_resources<<" : "<<resource_name<<"'s created" <<RESET<<endl;
 
         }
         void reduce(int n){
@@ -109,6 +124,10 @@ struct compMinResReq{
     }
 };
 
+void clear() {
+    cout << "\033[2J\033[1;1H"; // ANSI escape code to clear screen and move cursor to top-left
+}
+
 class batch{  
     public:
         string batch_name;
@@ -119,7 +138,7 @@ class batch{
 
         batch(string batch_name,int type){
             this->batch_name=batch_name;
-            cout<<"Batch "<<batch_name<<" created with ";
+            cout<<CYAN<<"Batch "<<batch_name<<" created with "<<RESET;
             if(type==1){
                 system.resize(6);
                 cout<<6<<" heaps"<<endl;
@@ -138,6 +157,7 @@ class batch{
         }
 
         void add(process&one_process){
+            cout<<YELLOW;
             if(this->batch_name=="SJF"){
                 if(one_process.memory<=8){
                     cout<<"Stored "<<one_process.pid<<" in SJF batch (8KB)"<<endl;
@@ -158,7 +178,7 @@ class batch{
                     cout<<"Stored "<<one_process.pid<<" in SJF batch (256KB)"<<endl;
                     system[5].push(one_process);
                 } else {
-                    cout<<"Memory cannot be greater than 256kb"<<endl;
+                    cout<<"Memory cannot be greater than 256kb"<<endl<<RESET;
                     return;
                 }
             } else if(this->batch_name=="RR"){
@@ -181,10 +201,11 @@ class batch{
                     cout<<"Stored "<<one_process.pid<<" in Round Robbin batch (16KB)"<<endl;
                     Queue[5].push(one_process);
                 } else {
-                    cout<<"Memory cannot be greater than 256kb"<<endl;
+                    cout<<"Memory cannot be greater than 256kb"<<endl<<RESET;
                     return;
                 }
             }
+            cout<<RESET;
                 // cout<<one_process.pid<<" added in the "<<batch_name<<" batch"<<endl;
         }
 
@@ -237,7 +258,7 @@ class batch{
                     cout<<"No process is availaible in the batch"<<endl;
                     receiver.workingProcessPtr=nullptr;
                 } else {
-                    cout<<receiver.coreName<<" is already wokring on a process : "<<receiver.workingProcessPtr->pid<<endl;
+                    cout<<space<<RED<<receiver.coreName<<" is already wokring on a process : "<<receiver.workingProcessPtr->pid<<endl<<RESET;
                 }
             } else if(receiverBatchName=="RR"){
                 // if(!alreadyWokring(receiver)){
@@ -604,10 +625,10 @@ void assignProcessesToCores(vector<batch>&all_batches,vector<core>&all_cores){
     for(int i=0;i<4;i++){
         all_batches[temp[i]].assignProcess(all_cores[i]);
         if(all_cores[i].workingProcessPtr!=nullptr){
-            cout<<all_cores[i].coreName<<" is working on : "<<all_cores[i].workingProcessPtr->pid<<endl;
+            cout<<space<<CYAN<<all_cores[i].coreName<<" is working on : "<<all_cores[i].workingProcessPtr->pid<<endl<<RESET;
             all_cores[i].workingProcessPtr->bt--;
             if(all_cores[i].workingProcessPtr->bt==0){
-                cout<<"Process : "<<all_cores[i].workingProcessPtr->pid<<" is executed successfully"<<endl;
+                cout<<space<<GREEN<<"Process : "<<all_cores[i].workingProcessPtr->pid<<" is executed successfully"<<RESET<<endl;
                 all_cores[i].workingProcessPtr=nullptr;
             }
         }
@@ -649,8 +670,9 @@ int main(){
     cout<<"Stored everythign in batches"<<endl;
 
     while(1){
+        clear();
+        cout<<space<<GREEN<<"Cores on the Job!"<<endl<<RESET;
         work(all_batches,all_cores,all_resources,all_working_processes);
-        cout<<"Came out of work fucntion"<<endl;
         runtime_fetching(all_batches,all_resources);
         sleep(1);
         cout<<"Fetching processes on runtime"<<endl;
